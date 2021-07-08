@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "aws-role-play"
+version = "0.1.0"
+description = "A CLI tool that makes assuming IAM roles easier"
+authors = ["Dave Gallant <dave.gallant@rewind.io>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+click = "^7.0"
+boto3 = "^1.17.104"
+
+[tool.poetry.dev-dependencies]
+black = "^21.6b0"
+rope = "^0.19.0"
+pylint = "^2.9.3"
+pytest = "^6.2.4"
+
+[tool.poetry.scripts]
+aws-role-play = "aws_role_play.__main__:cli"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
