@@ -26,13 +26,11 @@ def aws_config(role_admin, role_readonly):
     return config
 
 
-def test_get_list_of_roles(
-    aws_config,
-):
+def test_get_list_of_roles(aws_config, role_admin, role_readonly):
 
     roles = get_list_of_roles(aws_config)
 
     assert roles == [
-        ("arn:aws:iam::555555555555:role/admin", "admin"),
-        ("arn:aws:iam::555555555555:role/read-only", "readonly"),
+        (role_admin, "admin"),
+        (role_readonly, "readonly"),
     ]

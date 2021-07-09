@@ -2,16 +2,14 @@
 
 ## Motivation
 
-AWS CLI supports role assumption by [caching temporary credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html), but unfortunately does not place the temporary session credentials in a location where many other tools are expecting them to be.
+AWS CLI supports role assumption by [caching temporary credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html), but unfortunately does not export the temporary credentials to locations where other external applications are expecting them.
 
-`aws-role-play` makes it easier to switch between different roles. Assuming privileged roles with temporary credentials is good practice. Assuming roles eliminates the need to store privileged access keys for extended periods of time. This tool re-uses the same credentials cache as AWS CLI, puts the credentials in `~/.aws/credentials` so that external applications can read the credentials.
+`aws-role-play` makes it easier to write and export these temporary credentials. Assuming roles eliminates the need to store and transmit privileged long-term access keys. This tool re-uses the same credentials cache as AWS CLI, and then either exports the credentials to the current shell, or puts the credentials in `~/.aws/credentials` (or `AWS_SHARED_CREDENTIALS_FILE`) so that external applications can read the credentials.
 
 For more information on current issues:
 
+- https://github.com/hashicorp/terraform-provider-aws/issues/10491
 - https://github.com/aws/aws-cli/issues/4676
-- https://github.com/hashicorp/terraform-provider-aws/issues/10110
-
-If you have used [aws-extend-switch-roles](https://github.com/tilfinltd/aws-extend-switch-roles) in a web browser, this aims to be as convenient for terminal usage (i.e [terraform](https://github.com/hashicorp/terraform), [aws-nuke](https://github.com/rebuy-de/aws-nuke), etc).
 
 ## Installation
 
@@ -46,7 +44,17 @@ Having a `mfa_serial` is optional, but it's highly recommended that a policy req
 
 ## Usage
 
-> Note: Temporary role credentials are stored (and will overwrite existing credentials) in the profile provided
+## Exporting
+
+To export the temporary credentials to the current shell:
+
+```sh
+eval $(aws-role-play assume --profile personal-admin --export)
+```
+
+## Writing
+
+> Note: Temporary credentials will overwrite any existing credentials in the profile provided
 
 ```sh
 Usage: aws-role-play [OPTIONS] COMMAND [ARGS]...
@@ -62,10 +70,10 @@ Commands:
   list    List all roles defined in the aws config
 ```
 
-Based on the above configuration, to assume the admin role:
+Based on the above configuration, to assume the admin role and update your credentials:
 
 ```sh
-aws-role-play assume --profile personal-admin
+aws-role-play assume --profile personal-admin --write
 ```
 
 After assuming a role, check your identity by:
@@ -74,12 +82,12 @@ After assuming a role, check your identity by:
 aws sts get-caller-identity --profile personal-admin
 ```
 
-## TODO
-
-- When a profile is not specified with assume, a selection list should be presented
-
 ## Additional Resources
 
-- If your organization has [SSO](https://aws.amazon.com/single-sign-on/), you should consider [integrating it with awscli](https://docs.aws.amazon.com/singlesignon/latest/userguide/integrating-aws-cli.html) for an easier way to switch between roles and accounts. There is also [aws2-wrap](https://github.com/linaro-its/aws2-wrap) to get around the current limitations of awscli v2.
+- If your organization has [SSO](https://aws.amazon.com/single-sign-on/), you should consider [integrating it with awscli](https://docs.aws.amazon.com/singlesignon/latest/userguide/integrating-aws-cli.html) for an easier way to switch between roles and accounts. It doesn't export credentials either, so something like [aws2-wrap](https://github.com/linaro-its/aws2-wrap) helps.
+
+- [aws-vault](https://github.com/99designs/aws-vault) provides a secure way to store and access credentials.
 
 - If you use Azure AD, you might want to consider [aws-azure-login](https://github.com/sportradar/aws-azure-login).
+
+- [aws-extend-switch-roles](https://github.com/tilfinltd/aws-extend-switch-roles) is a set of browser extensions for switching roles based on aws config.
