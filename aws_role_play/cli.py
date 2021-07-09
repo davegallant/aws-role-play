@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import uuid
 import os
 from importlib.metadata import version
 
@@ -9,9 +8,13 @@ import click
 from botocore import credentials
 from botocore.session import Session
 
-from . import AWS_CONFIG_PATH, AWS_CREDENTIALS_PATH
+from . import AWS_CONFIG_FILE, AWS_SHARED_CREDENTIALS_FILE, AWS_PROFILE
 from .config import load_config
-from .sts import update_session_credentials, write_session_credentials
+from .sts import (
+    export_session_credentials,
+    update_session_credentials,
+    write_session_credentials,
+)
 from .roles import get_list_of_roles
 
 
@@ -45,39 +48,71 @@ def cli(ctx):
 @cli.command(short_help="Assumes a role and updates session credentials")
 @click.option(
     "--profile",
-    prompt="AWS Profile",
-    help="The profile you wish to assume (it must have a role_arn defined).",
+    help="The profile you wish to assume (it must have a role_arn defined)",
 )
-def assume(profile):
-    credentials_config = load_config(AWS_CREDENTIALS_PATH)
-    config = load_config(AWS_CONFIG_PATH)
+@click.option(
+    "--write",
+    default=False,
+    is_flag=True,
+    help="Whether or not to write credentials to the profile in AWS_CONFIG_FILE",
+)
+@click.option(
+    "--export",
+    default=False,
+    is_flag=True,
+    help="Whether or not to export the temporary security credentials as environment variables",
+)
+@click.option(
+    "--aws-cache-dir",
+    default=None,
+    help="The cache directory that awscli uses for either cli or sso. Defaults to ~/.aws/cli/cache",
+)
+def assume(profile, write, export, aws_cache_dir):
+
+    if write is False and export is False:
+        exit("Must choose to --export and/or --write")
+
+    if profile is None:
+        if AWS_PROFILE is None:
+            profile = click.prompt("AWS Profile")
+        else:
+            profile = AWS_PROFILE
+
+    credentials_config = load_config(AWS_SHARED_CREDENTIALS_FILE)
+    config = load_config(AWS_CONFIG_FILE)
 
     source_profile = config[f"profile {profile}"].get("source_profile")
 
     # Re-use the same cache as awscli
-    working_dir = os.path.join(os.path.expanduser("~"), ".aws/cli/cache")
+    if aws_cache_dir is None:
+        aws_cache_dir = os.path.join(os.path.expanduser("~"), ".aws/cli/cache")
 
     # Construct botocore session with cache
     cached_session = Session(profile=profile)
     provider = cached_session.get_component("credential_provider").get_provider(
         "assume-role"
     )
-    provider.cache = credentials.JSONFileCache(working_dir)
+    provider.cache = credentials.JSONFileCache(aws_cache_dir)
 
     # Authenticate using the source profile
     session = boto3.session.Session(
         profile_name=source_profile, botocore_session=cached_session
     )
     session_credentials = session.get_credentials().get_frozen_credentials()
-    updated_config = update_session_credentials(
-        credentials_config, session_credentials, profile
-    )
-    write_session_credentials(updated_config, AWS_CREDENTIALS_PATH)
+
+    if write:
+        updated_config = update_session_credentials(
+            credentials_config, session_credentials, profile
+        )
+        write_session_credentials(updated_config, AWS_SHARED_CREDENTIALS_FILE)
+
+    if export:
+        export_session_credentials(session_credentials)
 
 
 @cli.command(short_help="List all roles defined in the aws config")
 def list():
-    config = load_config(AWS_CONFIG_PATH)
+    config = load_config(AWS_CONFIG_FILE)
     roles = get_list_of_roles(config)
     for role, profile in roles:
         print(f"{role} ({profile})")
