@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import uuid
 import os
 from importlib.metadata import version
 
@@ -108,7 +107,7 @@ def assume(profile, write, export, aws_cache_dir):
         write_session_credentials(updated_config, AWS_SHARED_CREDENTIALS_FILE)
 
     if export:
-        export_session_credentials(session_credentials, config, profile)
+        export_session_credentials(session_credentials)
 
 
 @cli.command(short_help="List all roles defined in the aws config")
