@@ -14,6 +14,7 @@ def role_readonly():
     return "arn:aws:iam::555555555555:role/read-only"
 
 
+# pylint: disable=redefined-outer-name
 @pytest.fixture
 def aws_config(role_admin, role_readonly):
     config = configparser.ConfigParser()

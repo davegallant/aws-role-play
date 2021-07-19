@@ -26,6 +26,7 @@ def session_token():
     return Credentials("ACCESS_KEY", "SECRET", "TOKEN")
 
 
+# pylint: disable=redefined-outer-name
 @pytest.mark.parametrize(
     "credentials_config", [credentials_config_empty(), credentials_config_populated()]
 )

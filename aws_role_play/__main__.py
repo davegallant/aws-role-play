@@ -6,7 +6,7 @@ from .cli import cli
 
 
 def main():
-    cli()
+    cli(ctx=None)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 
 import os
-from importlib.metadata import version
+import sys
+
+try:
+    from importlib.metadata import version
+except ImportError:
+    from importlib_metadata import version
 
 import boto3
 import click
@@ -22,7 +27,7 @@ def get_version():
     return "aws-role-play v" + version("aws-role-play")
 
 
-def print_version(ctx, value):
+def print_version(ctx, _, value):
     if not value or ctx.resilient_parsing:
         return
     click.echo(get_version(), nl=True)
@@ -70,7 +75,7 @@ def cli(ctx):
 def assume(profile, write, export, aws_cache_dir):
 
     if write is False and export is False:
-        exit("Must choose to --export and/or --write")
+        sys.exit("Must choose to --export and/or --write")
 
     if profile is None:
         if AWS_PROFILE is None:
@@ -107,11 +112,11 @@ def assume(profile, write, export, aws_cache_dir):
         write_session_credentials(updated_config, AWS_SHARED_CREDENTIALS_FILE)
 
     if export:
-        export_session_credentials(session_credentials)
+        export_session_credentials(session_credentials, profile)
 
 
-@cli.command(short_help="List all roles defined in the aws config")
-def list():
+@cli.command("list", short_help="List all roles defined in the aws config")
+def list_roles():
     config = load_config(AWS_CONFIG_FILE)
     roles = get_list_of_roles(config)
     for role, profile in roles:
