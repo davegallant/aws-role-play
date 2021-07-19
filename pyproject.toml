@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.6.2"
 click = "^8.0"
 boto3 = "^1.17.104"
-importlib-metadata = "^4.6.1"
+importlib-metadata = {version = "^4.6.1", python = "<=3.7" }
 
 [tool.poetry.dev-dependencies]
 black = "^21.6b0"
