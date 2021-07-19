@@ -16,7 +16,8 @@ def write_session_credentials(config, credentials_path):
         config.write(configfile)
 
 
-def export_session_credentials(session_credentials):
+def export_session_credentials(session_credentials, profile):
     print(f"export AWS_ACCESS_KEY_ID={session_credentials.access_key}")
     print(f"export AWS_SECRET_ACCESS_KEY={session_credentials.secret_key}")
     print(f"export AWS_SESSION_TOKEN={session_credentials.token}")
+    print(f"export AWS_PROFILE={profile}")
