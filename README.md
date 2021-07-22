@@ -15,8 +15,22 @@ For more information on current issues:
 
 ## Installation
 
+There are multiple methods of installation:
+
+### brew
+
+Requires [brew](https://brew.sh).
+
 ```sh
-pip install --user git+https://github.com/rewindio/aws-role-play
+brew install rewindio/public/aws-role-play
+```
+
+### pipx
+
+Requires [pipx](https://github.com/pypa/pipx).
+
+```sh
+pipx install --user git+https://github.com/rewindio/aws-role-play
 ```
 
 ## Configuration
