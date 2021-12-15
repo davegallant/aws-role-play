@@ -82,6 +82,12 @@ To export the temporary credentials to the current shell:
 eval $(aws-role-play assume --profile foo-admin --export)
 ```
 
+This can be useful in circumstances where you want to run commands within the scope of the temporary credentials, as it will overwrite your environment variables (AWS_PROFILE, AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, AWS_SESSION_TOKEN).  
+Therefore, try this if you see a program looking for these sorts of environment variables.
+
+Example errors include:
+ * InvalidClientTokenId - The security token included in the request is invalid.
+
 ### Writing Credentials
 
 > Note: Temporary credentials will overwrite any existing credentials in the profile provided
