@@ -119,9 +119,16 @@ def assume(state, profile, write, export, aws_cache_dir):
         print("ERROR: profile does not exist. Check your configuration.")
         sys.exit(1)
 
+    if config[f"profile {profile}"].get("sso_account_id"):
+        aws_cache_type = "sso"
+    else:
+        aws_cache_type = "cli"
+
     # Re-use the same cache as awscli
     if aws_cache_dir is None:
-        aws_cache_dir = os.path.join(os.path.expanduser("~"), ".aws", "cli", "cache")
+        aws_cache_dir = os.path.join(
+            os.path.expanduser("~"), ".aws", aws_cache_type, "cache"
+        )
 
     # Construct botocore session with cache
     cached_session = Session(profile=profile)
